@@ -10,7 +10,7 @@ import (
 	"github.com/anchore/syft/syft/pkg"
 )
 
-func newDotnetDepsPackage(nameVersion string, lib dotnetDepsLibrary, locations ...file.Location) *pkg.Package {
+func newDotnetDepsPackage(nameVersion string, lib dotnetDepsLibrary, componentType pkg.ComponentType, locations ...file.Location) *pkg.Package {
 	name, version := extractNameAndVersion(nameVersion)
 
 	m := pkg.DotnetDepsMetadata{
@@ -22,14 +22,15 @@ func newDotnetDepsPackage(nameVersion string, lib dotnetDepsLibrary, locations .
 	}
 
 	p := &pkg.Package{
-		Name:         name,
-		Version:      version,
-		Locations:    file.NewLocationSet(locations...),
-		PURL:         packageURL(m),
-		Language:     pkg.Dotnet,
-		Type:         pkg.DotnetPkg,
-		MetadataType: pkg.DotnetDepsMetadataType,
-		Metadata:     m,
+		Name:          name,
+		Version:       version,
+		Locations:     file.NewLocationSet(locations...),
+		PURL:          packageURL(m),
+		Language:      pkg.Dotnet,
+		Type:          pkg.DotnetPkg,
+		ComponentType: componentType,
+		MetadataType:  pkg.DotnetDepsMetadataType,
+		Metadata:      m,
 	}
 
 	p.SetID()

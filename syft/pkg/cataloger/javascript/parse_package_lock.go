@@ -86,10 +86,22 @@ func finalizePackageLockWithoutPackageJSON(resolver file.Resolver, pkglock *pack
 	if pkglock.Name == "" {
 		name := rootNameFromPath(indexLocation)
 		p := packageLockPackage{Name: name, Version: "0.0.0"}
-		root = newPackageLockV2Package(resolver, indexLocation, name, p)
+		root = newPackageLockV2Package(
+			resolver,
+			indexLocation,
+			name,
+			pkg.ComponentTypeApplication,
+			p,
+		)
 	} else {
 		p := packageLockPackage{Name: pkglock.Name, Version: pkglock.Version}
-		root = newPackageLockV2Package(resolver, indexLocation, pkglock.Name, p)
+		root = newPackageLockV2Package(
+			resolver,
+			indexLocation,
+			pkglock.Name,
+			pkg.ComponentTypeApplication,
+			p,
+		)
 	}
 
 	if pkglock.LockfileVersion == 1 {
@@ -114,7 +126,13 @@ func finalizePackageLockWithPackageJSON(resolver file.Resolver, pkgjson *package
 	}
 
 	p := packageLockPackage{Name: pkgjson.Name, Version: pkgjson.Version}
-	root := newPackageLockV2Package(resolver, indexLocation, pkglock.Name, p)
+	root := newPackageLockV2Package(
+		resolver,
+		indexLocation,
+		pkglock.Name,
+		pkg.ComponentTypeApplication,
+		p,
+	)
 
 	if pkglock.LockfileVersion == 1 {
 		return finalizePackageLockWithPackageJSONV1(resolver, pkgjson, pkglock, indexLocation, root)
@@ -224,6 +242,9 @@ func finalizePackageLockV2(resolver file.Resolver, pkglock *packageLock, indexLo
 	depnameMap := map[string]pkg.Package{}
 	root.Licenses = pkg.NewLicenseSet(pkg.NewLicensesFromLocation(indexLocation, pkglock.Packages[""].License...)...)
 
+	pkgs = append(pkgs, root)
+	depnameMap[""] = root
+
 	// create packages
 	for name, lockDep := range pkglock.Packages {
 		// root pkg always equals "" in lock v2/v3
@@ -232,7 +253,13 @@ func finalizePackageLockV2(resolver file.Resolver, pkglock *packageLock, indexLo
 		}
 
 		n := getNameFromPath(name)
-		pkg := newPackageLockV2Package(resolver, indexLocation, n, *lockDep)
+		pkg := newPackageLockV2Package(
+			resolver,
+			indexLocation,
+			n,
+			pkg.ComponentTypeLibrary,
+			*lockDep,
+		)
 
 		pkgs = append(pkgs, pkg)
 		// need to store both names
@@ -242,11 +269,6 @@ func finalizePackageLockV2(resolver file.Resolver, pkglock *packageLock, indexLo
 
 	// create relationships
 	for name, lockDep := range pkglock.Packages {
-		// root pkg always equals "" in lock v2/v3
-		if name == "" {
-			continue
-		}
-
 		if dep, ok := depnameMap[name]; ok {
 			for childName := range lockDep.Dependencies {
 				if childDep, ok := depnameMap[childName]; ok {
@@ -258,16 +280,9 @@ func finalizePackageLockV2(resolver file.Resolver, pkglock *packageLock, indexLo
 					relationships = append(relationships, rel)
 				}
 			}
-			rootRel := artifact.Relationship{
-				From: dep,
-				To:   root,
-				Type: artifact.DependencyOfRelationship,
-			}
-			relationships = append(relationships, rootRel)
 		}
 	}
 
-	pkgs = append(pkgs, root)
 	pkg.Sort(pkgs)
 	pkg.SortRelationships(relationships)
 	return pkgs, relationships

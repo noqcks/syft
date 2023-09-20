@@ -59,6 +59,7 @@ func parseDotnetDeps(_ file.Resolver, _ *generic.Environment, reader file.Locati
 			rootpkg = newDotnetDepsPackage(
 				nameVersion,
 				lib,
+				pkg.ComponentTypeApplication,
 				reader.Location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation),
 			)
 		}
@@ -87,6 +88,7 @@ func parseDotnetDeps(_ file.Resolver, _ *generic.Environment, reader file.Locati
 		dotnetPkg := newDotnetDepsPackage(
 			nameVersion,
 			lib,
+			pkg.ComponentTypeLibrary,
 			reader.Location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation),
 		)
 

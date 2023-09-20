@@ -155,20 +155,21 @@ func newPackageLockV1Package(resolver file.Resolver, location file.Location, nam
 	)
 }
 
-func newPackageLockV2Package(resolver file.Resolver, location file.Location, name string, u packageLockPackage) pkg.Package {
+func newPackageLockV2Package(resolver file.Resolver, location file.Location, name string, componentType pkg.ComponentType, u packageLockPackage) pkg.Package {
 	return finalizeLockPkg(
 		resolver,
 		location,
 		pkg.Package{
-			Name:         name,
-			Version:      u.Version,
-			Locations:    file.NewLocationSet(location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation)),
-			Licenses:     pkg.NewLicenseSet(pkg.NewLicensesFromLocation(location, u.License...)...),
-			PURL:         packageURL(name, u.Version),
-			Language:     pkg.JavaScript,
-			Type:         pkg.NpmPkg,
-			MetadataType: pkg.NpmPackageLockJSONMetadataType,
-			Metadata:     pkg.NpmPackageLockJSONMetadata{Resolved: u.Resolved, Integrity: u.Integrity},
+			Name:          name,
+			Version:       u.Version,
+			Locations:     file.NewLocationSet(location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation)),
+			Licenses:      pkg.NewLicenseSet(pkg.NewLicensesFromLocation(location, u.License...)...),
+			PURL:          packageURL(name, u.Version),
+			Language:      pkg.JavaScript,
+			ComponentType: componentType,
+			Type:          pkg.NpmPkg,
+			MetadataType:  pkg.NpmPackageLockJSONMetadataType,
+			Metadata:      pkg.NpmPackageLockJSONMetadata{Resolved: u.Resolved, Integrity: u.Integrity},
 		},
 	)
 }
