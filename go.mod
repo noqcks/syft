@@ -1,4 +1,4 @@
-module github.com/noqcks/syft
+module github.com/anchore/syft
 
 go 1.21.0
 
