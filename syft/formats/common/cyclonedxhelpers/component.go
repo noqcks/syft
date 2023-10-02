@@ -30,10 +30,8 @@ func encodeComponent(p pkg.Package) cyclonedx.Component {
 	componentType := cyclonedx.ComponentTypeLibrary
 	if p.ComponentType != "" {
 		componentType = cyclonedx.ComponentType(p.ComponentType)
-	} else {
-		if p.Type == pkg.BinaryPkg {
-			componentType = cyclonedx.ComponentTypeApplication
-		}
+	} else if p.Type == pkg.BinaryPkg {
+		componentType = cyclonedx.ComponentTypeApplication
 	}
 
 	return cyclonedx.Component{

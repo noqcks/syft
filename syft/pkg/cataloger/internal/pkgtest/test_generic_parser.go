@@ -222,6 +222,7 @@ func (p *CatalogTester) TestParser(t *testing.T, parser generic.Parser) {
 	pkgs, relationships, err := parser(p.resolver, p.env, p.reader)
 	p.wantErr(t, err)
 	p.assertPkgs(t, pkgs, relationships)
+	p.assertNoBadRelationships(t, relationships)
 }
 
 func (p *CatalogTester) TestGroupedCataloger(t *testing.T, cataloger pkg.Cataloger) {
@@ -244,6 +245,7 @@ func (p *CatalogTester) TestGroupedCataloger(t *testing.T, cataloger pkg.Catalog
 	if p.assertResultExpectations {
 		p.wantErr(t, err)
 		p.assertPkgs(t, pkgs, relationships)
+		p.assertNoBadRelationships(t, relationships)
 	} else {
 		resolver.PruneUnfulfilledPathResponses(p.ignoreUnfulfilledPathResponses, p.ignoreAnyUnfulfilledPaths...)
 
@@ -277,6 +279,41 @@ func (p *CatalogTester) TestCataloger(t *testing.T, cataloger pkg.Cataloger) {
 
 		// if we aren't testing the results, we should focus on what was searched for (for glob-centric tests)
 		assert.Falsef(t, resolver.HasUnfulfilledPathRequests(), "unfulfilled path requests: \n%v", resolver.PrettyUnfulfilledPathRequests())
+	}
+}
+
+func (p *CatalogTester) assertNoBadRelationships(t *testing.T, relationships []artifact.Relationship) {
+	refs := make(map[artifact.ID]struct{})
+	parents := make(map[artifact.ID]struct{})
+
+	for _, rel := range relationships {
+		fromID := rel.From.ID()
+		toID := rel.To.ID()
+
+		refs[fromID] = struct{}{}
+		parents[toID] = struct{}{}
+
+		// detect self-referential relationships
+		if fromID == toID {
+			t.Errorf("relationship with self: %+v", rel)
+		}
+	}
+
+	danglingRefs := make(map[artifact.ID]struct{})
+	for parent := range parents {
+		if _, ok := refs[parent]; !ok {
+			danglingRefs[parent] = struct{}{}
+		}
+	}
+
+	// Output dangling dependencies if found
+	// we should always have one "dangling" dependency, which is the
+	// top level package (e.g. the root of the dependency tree)
+	if len(danglingRefs) > 1 {
+		t.Errorf("Dangling dependencies detected where 'To' never exists as 'From':")
+		for ref := range danglingRefs {
+			t.Errorf("  - %s", ref)
+		}
 	}
 }
 
@@ -368,7 +405,10 @@ func (p *CatalogTester) assertPkgs(t *testing.T, pkgs []pkg.Package, relationshi
 
 func TestFileParser(t *testing.T, fixturePath string, parser generic.Parser, expectedPkgs []pkg.Package, expectedRelationships []artifact.Relationship) {
 	t.Helper()
-	NewCatalogTester().FromFile(t, fixturePath).Expects(expectedPkgs, expectedRelationships).TestParser(t, parser)
+	NewCatalogTester().
+		FromFile(t, fixturePath).
+		Expects(expectedPkgs, expectedRelationships).
+		TestParser(t, parser)
 }
 
 func TestFileParserWithEnv(t *testing.T, fixturePath string, parser generic.Parser, env *generic.Environment, expectedPkgs []pkg.Package, expectedRelationships []artifact.Relationship) {
