@@ -8,13 +8,14 @@ import (
 	"path"
 	"strings"
 
+	"github.com/samber/lo"
+	"golang.org/x/xerrors"
+
 	"github.com/anchore/syft/internal/log"
 	"github.com/anchore/syft/syft/artifact"
 	"github.com/anchore/syft/syft/file"
 	syftPkg "github.com/anchore/syft/syft/pkg"
 	"github.com/anchore/syft/syft/pkg/cataloger/generic"
-	"github.com/samber/lo"
-	"golang.org/x/xerrors"
 )
 
 // integrity check
