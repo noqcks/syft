@@ -222,6 +222,7 @@ func (p *CatalogTester) TestParser(t *testing.T, parser generic.Parser) {
 	pkgs, relationships, err := parser(p.resolver, p.env, p.reader)
 	p.wantErr(t, err)
 	p.assertPkgs(t, pkgs, relationships)
+	p.assertNoBadRelationships(t, relationships)
 }
 
 func (p *CatalogTester) TestGroupedCataloger(t *testing.T, cataloger pkg.Cataloger) {
@@ -404,7 +405,10 @@ func (p *CatalogTester) assertPkgs(t *testing.T, pkgs []pkg.Package, relationshi
 
 func TestFileParser(t *testing.T, fixturePath string, parser generic.Parser, expectedPkgs []pkg.Package, expectedRelationships []artifact.Relationship) {
 	t.Helper()
-	NewCatalogTester().FromFile(t, fixturePath).Expects(expectedPkgs, expectedRelationships).TestParser(t, parser)
+	NewCatalogTester().
+		FromFile(t, fixturePath).
+		Expects(expectedPkgs, expectedRelationships).
+		TestParser(t, parser)
 }
 
 func TestFileParserWithEnv(t *testing.T, fixturePath string, parser generic.Parser, env *generic.Environment, expectedPkgs []pkg.Package, expectedRelationships []artifact.Relationship) {
