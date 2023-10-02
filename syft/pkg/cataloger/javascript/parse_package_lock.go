@@ -236,6 +236,7 @@ func finalizePackageLockWithPackageJSONV1(resolver file.Resolver, pkgjson *packa
 	return pkgs, relationships
 }
 
+//nolint:funlen
 func finalizePackageLockV2(resolver file.Resolver, pkglock *packageLock, indexLocation file.Location, root syftPkg.Package) ([]syftPkg.Package, []artifact.Relationship) {
 	if pkglock.LockfileVersion != 3 && pkglock.LockfileVersion != 2 {
 		return nil, nil
