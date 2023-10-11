@@ -14,6 +14,7 @@ import (
 	"github.com/anchore/syft/internal/log"
 	"github.com/anchore/syft/syft/artifact"
 	"github.com/anchore/syft/syft/file"
+	"github.com/anchore/syft/syft/pkg"
 	syftPkg "github.com/anchore/syft/syft/pkg"
 	"github.com/anchore/syft/syft/pkg/cataloger/generic"
 )
@@ -117,6 +118,13 @@ func finalizePackageLockWithoutPackageJSON(resolver file.Resolver, pkglock *pack
 	}
 
 	if pkglock.LockfileVersion == 3 || pkglock.LockfileVersion == 2 {
+		root = newPackageLockV2Package(
+			resolver,
+			indexLocation,
+			pkglock.Name,
+			syftPkg.ComponentTypeApplication,
+			*pkglock.Packages[""],
+		)
 		return finalizePackageLockV2(resolver, pkglock, indexLocation, root)
 	}
 
@@ -163,7 +171,13 @@ func finalizePackageLockWithoutPackageJSONV1(resolver file.Resolver, pkglock *pa
 	// create packages
 	for name, lockDep := range pkglock.Dependencies {
 		lockDep.name = name
-		pkg := newPackageLockV1Package(resolver, indexLocation, name, *lockDep)
+		pkg := newPackageLockV1Package(
+			resolver,
+			indexLocation,
+			name,
+			pkg.ComponentTypeLibrary,
+			*lockDep,
+		)
 		pkgs = append(pkgs, pkg)
 	}
 	syftPkg.Sort(pkgs)
@@ -183,7 +197,13 @@ func finalizePackageLockWithPackageJSONV1(resolver file.Resolver, pkgjson *packa
 	// create packages
 	for name, lockDep := range pkglock.Dependencies {
 		lockDep.name = name
-		pkg := newPackageLockV1Package(resolver, indexLocation, name, *lockDep)
+		pkg := newPackageLockV1Package(
+			resolver,
+			indexLocation,
+			name,
+			pkg.ComponentTypeLibrary,
+			*lockDep,
+		)
 		pkgs = append(pkgs, pkg)
 		depnameMap[name] = pkg
 	}

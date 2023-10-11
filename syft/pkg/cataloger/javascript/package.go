@@ -123,7 +123,7 @@ func packageURL(name, version string) string {
 	).ToString()
 }
 
-func newPackageLockV1Package(resolver file.Resolver, location file.Location, name string, u packageLockDependency) pkg.Package {
+func newPackageLockV1Package(resolver file.Resolver, location file.Location, name string, componentType pkg.ComponentType, u packageLockDependency) pkg.Package {
 	version := u.Version
 
 	const aliasPrefixPackageLockV1 = "npm:"
@@ -143,14 +143,15 @@ func newPackageLockV1Package(resolver file.Resolver, location file.Location, nam
 		resolver,
 		location,
 		pkg.Package{
-			Name:         name,
-			Version:      version,
-			Locations:    file.NewLocationSet(location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation)),
-			PURL:         packageURL(name, version),
-			Language:     pkg.JavaScript,
-			Type:         pkg.NpmPkg,
-			MetadataType: pkg.NpmPackageLockJSONMetadataType,
-			Metadata:     pkg.NpmPackageLockJSONMetadata{Resolved: u.Resolved, Integrity: u.Integrity},
+			Name:          name,
+			Version:       version,
+			Locations:     file.NewLocationSet(location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation)),
+			PURL:          packageURL(name, version),
+			Language:      pkg.JavaScript,
+			Type:          pkg.NpmPkg,
+			ComponentType: componentType,
+			MetadataType:  pkg.NpmPackageLockJSONMetadataType,
+			Metadata:      pkg.NpmPackageLockJSONMetadata{Resolved: u.Resolved, Integrity: u.Integrity},
 		},
 	)
 }

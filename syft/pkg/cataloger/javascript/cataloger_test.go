@@ -33,15 +33,16 @@ func expectedPackagesAndRelationshipsLockV1(locationSet file.LocationSet, metada
 		},
 	}
 	rxjs := pkg.Package{
-		Name:         "rxjs",
-		Version:      "7.5.7",
-		FoundBy:      "javascript-cataloger",
-		PURL:         "pkg:npm/rxjs@7.5.7",
-		Locations:    locationSet,
-		Language:     pkg.JavaScript,
-		Type:         pkg.NpmPkg,
-		MetadataType: pkg.NpmPackageLockJSONMetadataType,
-		Metadata:     pkg.NpmPackageLockJSONMetadata{},
+		Name:          "rxjs",
+		Version:       "7.5.7",
+		FoundBy:       "javascript-cataloger",
+		PURL:          "pkg:npm/rxjs@7.5.7",
+		Locations:     locationSet,
+		Language:      pkg.JavaScript,
+		Type:          pkg.NpmPkg,
+		MetadataType:  pkg.NpmPackageLockJSONMetadataType,
+		ComponentType: pkg.ComponentTypeLibrary,
+		Metadata:      pkg.NpmPackageLockJSONMetadata{},
 	}
 	testApp := pkg.Package{
 		Name:          "test-app",
@@ -56,37 +57,40 @@ func expectedPackagesAndRelationshipsLockV1(locationSet file.LocationSet, metada
 		Metadata:      pkg.NpmPackageLockJSONMetadata{},
 	}
 	tslib := pkg.Package{
-		Name:         "tslib",
-		Version:      "2.6.2",
-		FoundBy:      "javascript-cataloger",
-		PURL:         "pkg:npm/tslib@2.6.2",
-		Locations:    locationSet,
-		Language:     pkg.JavaScript,
-		Type:         pkg.NpmPkg,
-		MetadataType: pkg.NpmPackageLockJSONMetadataType,
-		Metadata:     pkg.NpmPackageLockJSONMetadata{},
+		Name:          "tslib",
+		Version:       "2.6.2",
+		FoundBy:       "javascript-cataloger",
+		PURL:          "pkg:npm/tslib@2.6.2",
+		Locations:     locationSet,
+		Language:      pkg.JavaScript,
+		Type:          pkg.NpmPkg,
+		MetadataType:  pkg.NpmPackageLockJSONMetadataType,
+		ComponentType: pkg.ComponentTypeLibrary,
+		Metadata:      pkg.NpmPackageLockJSONMetadata{},
 	}
 	typescript := pkg.Package{
-		Name:         "typescript",
-		Version:      "4.7.4",
-		FoundBy:      "javascript-cataloger",
-		PURL:         "pkg:npm/typescript@4.7.4",
-		Locations:    locationSet,
-		Language:     pkg.JavaScript,
-		Type:         pkg.NpmPkg,
-		MetadataType: pkg.NpmPackageLockJSONMetadataType,
-		Metadata:     pkg.NpmPackageLockJSONMetadata{},
+		Name:          "typescript",
+		Version:       "4.7.4",
+		FoundBy:       "javascript-cataloger",
+		PURL:          "pkg:npm/typescript@4.7.4",
+		Locations:     locationSet,
+		Language:      pkg.JavaScript,
+		Type:          pkg.NpmPkg,
+		MetadataType:  pkg.NpmPackageLockJSONMetadataType,
+		ComponentType: pkg.ComponentTypeLibrary,
+		Metadata:      pkg.NpmPackageLockJSONMetadata{},
 	}
 	zonejs := pkg.Package{
-		Name:         "zone.js",
-		Version:      "0.11.8",
-		FoundBy:      "javascript-cataloger",
-		PURL:         "pkg:npm/zone.js@0.11.8",
-		Locations:    locationSet,
-		Language:     pkg.JavaScript,
-		Type:         pkg.NpmPkg,
-		MetadataType: pkg.NpmPackageLockJSONMetadataType,
-		Metadata:     pkg.NpmPackageLockJSONMetadata{},
+		Name:          "zone.js",
+		Version:       "0.11.8",
+		FoundBy:       "javascript-cataloger",
+		PURL:          "pkg:npm/zone.js@0.11.8",
+		Locations:     locationSet,
+		Language:      pkg.JavaScript,
+		Type:          pkg.NpmPkg,
+		MetadataType:  pkg.NpmPackageLockJSONMetadataType,
+		ComponentType: pkg.ComponentTypeLibrary,
+		Metadata:      pkg.NpmPackageLockJSONMetadata{},
 	}
 
 	l := []*pkg.Package{
@@ -754,7 +758,7 @@ func Test_JavaScriptCataloger_PnpmLock(t *testing.T) {
 // 		expected []string
 // 	}{
 // 		{
-// 			name:    "obtain package lock files",
+// 			name:    "obtain package lock files",pcomponent_test.go
 // 			fixture: "test-fixtures/pkg-json-and-lock/v1",
 // 			expected: []string{
 // 				"package-lock.json",
