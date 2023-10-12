@@ -29,7 +29,7 @@ func parseYarnLock(resolver file.Resolver, _ *generic.Environment, reader file.L
 	return pkgs, nil, nil
 }
 
-func newYarnLockPackage(resolver file.Resolver, location file.Location, p *yarnLockPackage) pkg.Package {
+func newYarnLockPackage(resolver file.Resolver, location file.Location, componentType pkg.ComponentType, p *yarnLockPackage) pkg.Package {
 	if p == nil {
 		return pkg.Package{}
 	}
@@ -38,13 +38,14 @@ func newYarnLockPackage(resolver file.Resolver, location file.Location, p *yarnL
 		resolver,
 		location,
 		pkg.Package{
-			Name:         p.Name,
-			Version:      p.Version,
-			Locations:    file.NewLocationSet(location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation)),
-			PURL:         packageURL(p.Name, p.Version),
-			MetadataType: pkg.NpmPackageLockJSONMetadataType,
-			Language:     pkg.JavaScript,
-			Type:         pkg.NpmPkg,
+			Name:          p.Name,
+			Version:       p.Version,
+			Locations:     file.NewLocationSet(location.WithAnnotation(pkg.EvidenceAnnotationKey, pkg.PrimaryEvidenceAnnotation)),
+			PURL:          packageURL(p.Name, p.Version),
+			MetadataType:  pkg.NpmPackageLockJSONMetadataType,
+			Language:      pkg.JavaScript,
+			ComponentType: componentType,
+			Type:          pkg.NpmPkg,
 			Metadata: pkg.NpmPackageLockJSONMetadata{
 				Resolved:  p.Resolved,
 				Integrity: p.Integrity,
@@ -118,11 +119,21 @@ func finalizeYarnLockWithPackageJSON(resolver file.Resolver, pkgjson *packageJSO
 		Name:    pkgjson.Name,
 		Version: pkgjson.Version,
 	}
-	root = newYarnLockPackage(resolver, indexLocation, &p)
+	root = newYarnLockPackage(
+		resolver,
+		indexLocation,
+		pkg.ComponentTypeApplication,
+		&p,
+	)
 
 	for name, version := range pkgjson.Dependencies {
 		depPkg := yarnlock[key.NpmPackageKey(name, version)]
-		dep := newYarnLockPackage(resolver, indexLocation, depPkg)
+		dep := newYarnLockPackage(
+			resolver,
+			indexLocation,
+			pkg.ComponentTypeLibrary,
+			depPkg,
+		)
 		rel := artifact.Relationship{
 			From: dep,
 			To:   root,
@@ -132,7 +143,12 @@ func finalizeYarnLockWithPackageJSON(resolver file.Resolver, pkgjson *packageJSO
 	}
 	for name, version := range pkgjson.DevDependencies {
 		depPkg := yarnlock[key.NpmPackageKey(name, version)]
-		dep := newYarnLockPackage(resolver, indexLocation, depPkg)
+		dep := newYarnLockPackage(
+			resolver,
+			indexLocation,
+			pkg.ComponentTypeLibrary,
+			depPkg,
+		)
 		rel := artifact.Relationship{
 			From: dep,
 			To:   root,
@@ -148,26 +164,37 @@ func finalizeYarnLockWithPackageJSON(resolver file.Resolver, pkgjson *packageJSO
 			continue
 		}
 
-		pkg := newYarnLockPackage(resolver, indexLocation, lockPkg)
+		pkg := newYarnLockPackage(
+			resolver,
+			indexLocation,
+			pkg.ComponentTypeLibrary,
+			lockPkg,
+		)
 		pkgs = append(pkgs, pkg)
 		seenPkgMap[key.NpmPackageKey(lockPkg.Name, lockPkg.Version)] = true
 	}
 
 	// create relationships
 	for _, lockPkg := range yarnlock {
-		pkg := newYarnLockPackage(resolver, indexLocation, lockPkg)
+		p := newYarnLockPackage(
+			resolver,
+			indexLocation,
+			pkg.ComponentTypeLibrary,
+			lockPkg,
+		)
 
 		for name, version := range lockPkg.Dependencies {
 			dep := yarnlock[key.NpmPackageKey(name, version)]
 			depPkg := newYarnLockPackage(
 				resolver,
 				indexLocation,
+				pkg.ComponentTypeLibrary,
 				dep,
 			)
 
 			rel := artifact.Relationship{
 				From: depPkg,
-				To:   pkg,
+				To:   p,
 				Type: artifact.DependencyOfRelationship,
 			}
 			relationships = append(relationships, rel)
@@ -191,7 +218,12 @@ func finalizeYarnLockWithoutPackageJSON(resolver file.Resolver, yarnlock map[str
 			Name:    name,
 			Version: "0.0.0",
 		}
-		root := newYarnLockPackage(resolver, indexLocation, &p)
+		root := newYarnLockPackage(
+			resolver,
+			indexLocation,
+			pkg.ComponentTypeLibrary,
+			&p,
+		)
 		pkgs = append(pkgs, root)
 	}
 
@@ -201,26 +233,37 @@ func finalizeYarnLockWithoutPackageJSON(resolver file.Resolver, yarnlock map[str
 			continue
 		}
 
-		pkg := newYarnLockPackage(resolver, indexLocation, lockPkg)
+		pkg := newYarnLockPackage(
+			resolver,
+			indexLocation,
+			pkg.ComponentTypeLibrary,
+			lockPkg,
+		)
 		pkgs = append(pkgs, pkg)
 		seenPkgMap[key.NpmPackageKey(lockPkg.Name, lockPkg.Version)] = true
 	}
 
 	// create relationships
 	for _, lockPkg := range yarnlock {
-		pkg := newYarnLockPackage(resolver, indexLocation, lockPkg)
+		p := newYarnLockPackage(
+			resolver,
+			indexLocation,
+			pkg.ComponentTypeLibrary,
+			lockPkg,
+		)
 
 		for name, version := range lockPkg.Dependencies {
 			dep := yarnlock[key.NpmPackageKey(name, version)]
 			depPkg := newYarnLockPackage(
 				resolver,
 				indexLocation,
+				pkg.ComponentTypeLibrary,
 				dep,
 			)
 
 			rel := artifact.Relationship{
 				From: depPkg,
-				To:   pkg,
+				To:   p,
 				Type: artifact.DependencyOfRelationship,
 			}
 			relationships = append(relationships, rel)
