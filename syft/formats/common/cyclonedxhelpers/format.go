@@ -121,7 +121,8 @@ func toBomDescriptor(name, version string, srcMetadata source.Description) *cycl
 				Version: version,
 			},
 		},
-		Component: toBomDescriptorComponent(srcMetadata),
+		Properties: toBomProperties(srcMetadata),
+		Component:  toBomDescriptorComponent(srcMetadata),
 	}
 }
 
@@ -213,6 +214,15 @@ func toDependencies(packages []pkg.Package, relationships []artifact.Relationshi
 	})
 
 	return result
+}
+
+func toBomProperties(srcMetadata source.Description) *[]cyclonedx.Property {
+	metadata, ok := srcMetadata.Metadata.(source.StereoscopeImageSourceMetadata)
+	if ok {
+		props := encodeProperties(metadata.Labels, "syft:image:labels")
+		return &props
+	}
+	return nil
 }
 
 func toBomDescriptorComponent(srcMetadata source.Description) *cyclonedx.Component {
